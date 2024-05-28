@@ -1,3 +1,7 @@
+import os
+from os.path import join, dirname
+from dotenv import load_dotenv
+
 from flask import (
     Flask,
     render_template,
@@ -10,7 +14,6 @@ from flask import (
     session,
     flash
 )
-import os
 from datetime import datetime
 import bcrypt
 from werkzeug.utils import secure_filename
@@ -27,9 +30,16 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config["UPLOAD_FOLDER"] = "./static/profile_pics"
 
 
-# DATABASE
-client = MongoClient("mongodb://driyanti237:komunitasdatabase@ac-aj7yhdb-shard-00-00.njrv8qm.mongodb.net:27017,ac-aj7yhdb-shard-00-01.njrv8qm.mongodb.net:27017,ac-aj7yhdb-shard-00-02.njrv8qm.mongodb.net:27017/?ssl=true&replicaSet=atlas-13lps3-shard-0&authSource=admin&retryWrites=true&w=majority&appName=KOMUNITAS")
-db = client["Komunitas"]
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
+
+MONGODB_URI = os.environ.get("MONGODB_URI")
+DB_NAME = os.environ.get("DB_NAME")
+
+client = MongoClient(MONGODB_URI)
+
+db = client[DB_NAME]
+
 
 # UNTUK CEK SUDAH LOGIN BELUM
 def is_logged_in():

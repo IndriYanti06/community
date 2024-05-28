@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin |Gallery</title>
+
+
+    <!-- ICON  -->
+    <link rel="shortcut icon" href="{{ url_for('static', filename='image/logo-top.png') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='image/logo-top.png') }}" type="image/x-icon">
+
+    <!-- CSS    -->
+    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="../static/default.css">
+    <link rel="stylesheet" href="../static/sidebar.css">
+
+    <script src="../static/main.js"></script>
+    <!-- BOOTSTRAP -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css"
+        integrity="sha512-dPXYcDub/aeb08c63jRq/k6GaKccl256JQy/AnOq7CAnEZ9FzSL9wSbcZkMp4R26vBsMLFYH4kQ67/bbV8XaCQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- JavaScript -->
+    <script src="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
+    <!-- CSS -->
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css" />
+    <!-- Default theme -->
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css" />
+    <!-- Semantic UI theme -->
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/semantic.min.css" />
+    <!-- Bootstrap theme -->
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/bootstrap.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"
+        integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <style>
+        .toast {
+            background-color: #042d60;
+        }
+
+        /* Mengubah warna teks notifikasi toastr menjadi hitam */
+        .toast-message {
+            color: #000000;
+        }
+
+        /* Mengubah warna border notifikasi toastr menjadi abu-abu */
+        .toast {
+            border: 1px solid #cccccc;
+        }
+
+        /* Mengubah radius border notifikasi toastr */
+        .toast-progress {
+            background-color: #007bff;
+        }
+
+        .toast {
+            border-radius: 4px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="add-gambar flex-row">
+
+        <div class="sidebar">
+            <div class="logo">
+                <div class="img-logo">
+                    <img src="../static/image/logo.png" alt="Logo" style="max-width: 75px;">
+                </div>
+                <div class="menu">
+                    <li onclick="toggleColor(this)">
+                        <i class="bi bi-calendar4-event"></i>
+                        <span onclick="window.location.href='/admin'">Event</span>
+                    </li>
+                    <li onclick="toggleColor(this)">
+                        <i class="bi bi-image"></i>
+                        <span onclick="window.location.href='/admin/gallery'">Gallery</span>
+                    </li>
+                </div>
+            </div>
+            <div class="profile flex-row">
+                <img src="../static/profile_pics/profile_placeholder.jpg" alt="Admin">
+                <p>Admin</p>
+            </div>
+        </div>
+
+        <div class="admin">
+            <div class="gallery-section" style="background-color:  #F5F7F8;">
+                <div class="container " style="width: 1050px;">
+                    <div class="fitur">
+                        <button class="btn-fitur" onclick="toggleColor(this)"><i
+                                class="bi bi-plus-circle"></i>New</button>
+                        <button class="btn-fitur" onclick="confirmDeletes()"><i class="bi bi-trash"></i>
+                            Delete</button>
+                    </div>
+                    <div class="gallery" id="gallery">
+                        <div class="add">
+                            <input type="file" id="fileInput" style="display: none;" accept="image/*">
+                            <button onclick="openFileInput()">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+
+                        <!-- UNTUK MENAMPILKAN GAMBAR YANG DITERIMA DARI SERVER -->
+                        {% for file in gallery %}
+                        <div class="image">
+                            <img src="{{ url_for('static', filename=file.filename.split('static/')[1]) }}" alt="Image">
+                            <button class="btn-hps" onclick="confirmDelete('{{ file.filename }}')"><i
+                                    class="fas fa-trash"></i></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openFileInput() {
+            document.getElementById('fileInput').click();
+        }
+
+
+        // UNTUK MENGIRIMKAN FILE YANG DITERIMA KE SERVER
+        function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/admin/gallery', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.text())
+                .then(data => {
+                    console.log(data);
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        document.getElementById('fileInput').addEventListener('change', function () {
+            uploadFile();
+        });
+
+        function toggleColor(btn) {
+            btn.classList.toggle("clicked");
+        }
+
+        //  NOTIFIKASI
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": false,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        }
+
+        function confirmDelete(filename) {
+            alertify.confirm('Confirm Delete Event',
+                "Are you sure you want to delete this file?",
+                function () {
+                    deleteImage(filename);
+                },
+                function () {
+                    // User clicked 'cancel', no action needed
+                }
+            ).set('transition', 'zoom').set('closable', true);
+        }
+        function deleteImage(filename) {
+            fetch('/admin/gallery/delete/image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ filename: filename })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        toastr["success"]("File deleted successfully");
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 2000);
+                    } else {
+                        toastr.error("Failed to delete file");
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("An error occurred while deleting the file");
+                });
+        }
+
+
+        function confirmDeletes() {
+            alertify.confirm('Confirm Delete Event',
+                "Are you sure you want to delete all files?",
+                function () {
+                    deleteAllFiles();
+                },
+                function () {
+                    // User clicked 'cancel', no action needed
+                }
+            ).set('transition', 'zoom').set('closable', true);
+        }
+
+        function deleteAllFiles() {
+            $.ajax({
+                url: '/admin/gallery/delete',
+                type: 'POST',
+                contentType: 'application/json',
+                success: function (data) {
+                    toastr['success'](data.message);
+                    window.location.reload();
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    console.error('Error:', errorThrown);
+                    toastr['error']("An error occurred while deleting files");
+                }
+            });
+        }
+
+    </script>
+</body>
+
+</html>
